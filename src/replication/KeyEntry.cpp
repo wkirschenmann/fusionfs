@@ -67,8 +67,8 @@ void KeyEntry::assign(const string& sentry) {
 
 	if (found != string::npos) {
 
-		first(Const::trim(remains.substr(0, int(found))));
-		second(Const::trim(remains.substr(int(found) + 1)));
+		first(trim(remains.substr(0, int(found))));
+		second(trim(remains.substr(int(found) + 1)));
 	}
 }
 

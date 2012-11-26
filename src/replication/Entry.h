@@ -8,7 +8,6 @@
 #ifndef ENTRY_H_
 #define ENTRY_H_
 
-#include "../zht/inc/Const.h"
 #include <string>
 using namespace std;
 
