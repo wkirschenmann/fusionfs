@@ -34,6 +34,14 @@ int c_checkinFile2(const char *proto, const char *master_ip,
 			remote_filename, local_filename);
 }
 
+int c_rmFile(const char *proto, const char *master_ip, const char *current_ip,
+		const char *server_port, const char *remote_filename,
+		const char *local_filename) {
+
+	return FileWaiter::rmFile(proto, master_ip, current_ip, server_port,
+			remote_filename, local_filename);
+}
+
 #include <string.h>
 #include "../ffsnet/ffsnet.h"
 #include "NeighborUtil.h"
@@ -78,12 +86,12 @@ int FileWaiter::checkinFile(const char *proto, const char *master_ip,
 		const char *server_port, const char *remote_filename,
 		const char *local_filename) {
 
-	/*update master copy*/
-	int rs = ffs_sendfile(proto, master_ip, server_port, remote_filename,
-			local_filename);
+	/*	update master copy
+	 int rs = ffs_sendfile(proto, master_ip, server_port, remote_filename,
+	 local_filename);*/
 
 	/*update the first replica*/
-	rs = ffs_sendfile(proto, c_get1stReplicaAddr(master_ip), server_port,
+	int rs = ffs_sendfile(proto, c_get1stReplicaAddr(master_ip), server_port,
 			remote_filename, local_filename);
 
 	/*update the second replica*/
@@ -117,6 +125,24 @@ int FileWaiter::checkinFile(const char *proto, const char *master_ip,
 
 		rs = ffs_sendfile(proto, _2ndIp, server_port, remote_filename,
 				local_filename);
+	}
+
+	return rs;
+}
+
+int FileWaiter::rmFile(const char *proto, const char *master_ip,
+		const char *current_ip, const char *server_port,
+		const char *remote_filename, const char *local_filename) {
+
+	int rs = 0;
+
+	const char *_1stIp = c_get1stReplicaAddr(master_ip);
+
+	const char *_2ndIp = c_get2ndReplicaAddr(master_ip);
+
+	if (strcmp(_1stIp, current_ip) && strcmp(_2ndIp, current_ip)) { //not 1st and 2nd replica address
+
+		rs = ffs_rmfile("udt", current_ip, "9000", local_filename); //xbz
 	}
 
 	return rs;

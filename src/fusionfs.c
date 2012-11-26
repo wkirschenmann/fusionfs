@@ -844,6 +844,7 @@ int fusion_release(const char *path, struct fuse_file_info *fi) {
 
 		/*remove the file from its old node*/
 //		ffs_rmfile_c("udt", oldip, "9000", fpath);//xbz
+		c_rmFile("udt", oldip, myip, "9000", fpath, fpath); //xbz
 		log_msg("\n=========DFZ debug _release(): %s unlinked from %s. \n\n",
 				fpath, oldip);
 

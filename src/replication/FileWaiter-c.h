@@ -29,6 +29,10 @@ FFS_CPP(extern "C" {)
 			const char *current_ip, const char *server_port,
 			const char *remote_filename, const char *local_filename);
 
+	int c_rmFile(const char *proto, const char *master_ip,
+			const char *current_ip, const char *server_port,
+			const char *remote_filename, const char *local_filename);
+
 	FFS_CPP (})
 
 #endif /* FILEWAITER_C_H_ */
