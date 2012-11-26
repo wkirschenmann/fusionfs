@@ -50,6 +50,8 @@ public:
 	/*get address of the second replica based on master address*/
 	static Address get2ndReplicaAddr(const string& host, const string& port);
 
+	template<class TYPE> static string toString(const TYPE& ele);
+
 private:
 	static void setParametersInternal(const string& configFile, MAP& configMap);
 

@@ -6,6 +6,9 @@
  */
 
 #include "Entry.h"
+#include <sstream>
+
+using namespace std;
 
 namespace iit {
 namespace cs495 {
@@ -29,7 +32,12 @@ void Entry::assign(const string& sentry) {
 
 string Entry::trim(const string& value) {
 
-	return Const::trim(value);
+	string str = value;
+	stringstream trimmer;
+	trimmer << str;
+	trimmer >> str;
+
+	return str;
 }
 
 } /* namespace replication */

@@ -43,6 +43,8 @@ const char* c_get2ndReplicaAddr(const char *address) {
 
 #include <fstream>
 #include <iostream>
+#include <sstream>
+
 using namespace std;
 
 namespace iit {
@@ -117,17 +119,25 @@ void NeighborUtil::setNeighborSeeds(const string& neighborCfg) {
 	setParametersInternal(neighborCfg, _NSS);
 }
 
+template<class TYPE> string NeighborUtil::toString(const TYPE& ele) {
+
+	stringstream ss;
+	ss << ele;
+
+	return ss.str();
+}
+
 void NeighborUtil::setParametersInternal(const string& configFile,
 		MAP& configMap) {
 
 	ifstream ifs(configFile.c_str(), ifstream::in);
 
-	const char *delimiter = Const::CFG_DELIMITERS.c_str();
+	const char *delimiter = " ";
 
 	string line;
 	while (getline(ifs, line)) {
 
-		string remains = Const::toString(line);
+		string remains = toString(line);
 		if (remains.empty())
 			continue;
 
@@ -135,8 +145,8 @@ void NeighborUtil::setParametersInternal(const string& configFile,
 
 		if (found != string::npos) {
 
-			string one = Const::toString(remains.substr(0, int(found)));
-			string two = Const::toString(remains.substr(int(found) + 1));
+			string one = toString(remains.substr(0, int(found)));
+			string two = toString(remains.substr(int(found) + 1));
 
 			if (one.empty() || two.empty())
 				continue;
