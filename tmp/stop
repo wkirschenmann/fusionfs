@@ -1,5 +1,0 @@
-#!/bin/sh
-
-
-#fusermount -u /home/dzhao/fusion_mount
-fusermount -u /home/xiaobingo/cs495proj5/fusion_mount
