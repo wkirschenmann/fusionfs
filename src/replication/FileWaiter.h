@@ -37,6 +37,10 @@ public:
 	static int rmFile(const char *proto, const char *master_ip,
 			const char *current_ip, const char *server_port,
 			const char *remote_filename, const char *local_filename);
+
+private:
+	static void* updateReplica(void* const arg);
+
 };
 
 } /* namespace replication */

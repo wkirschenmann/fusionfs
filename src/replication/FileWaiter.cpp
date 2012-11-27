@@ -46,12 +46,35 @@ int c_rmFile(const char *proto, const char *master_ip, const char *current_ip,
 #include "../ffsnet/ffsnet.h"
 #include "NeighborUtil.h"
 #include "NeighborUtil-c.h"
+#include <pthread.h>
 
 namespace iit {
 namespace cs495 {
 namespace proj5 {
 namespace dfs {
 namespace replication {
+
+class ThreadArg {
+
+public:
+	ThreadArg(const char *proto, const char *replica_ip,
+			const char *server_port, const char *remote_filename,
+			const char *local_filename) {
+
+		this->proto = proto;
+		this->replica_ip = replica_ip;
+		this->server_port = server_port;
+		this->remote_filename = remote_filename;
+		this->local_filename = local_filename;
+	}
+
+public:
+	const char *proto;
+	const char *replica_ip;
+	const char *server_port;
+	const char *remote_filename;
+	const char *local_filename;
+};
 
 FileWaiter::FileWaiter() {
 }
@@ -91,14 +114,35 @@ int FileWaiter::checkinFile(const char *proto, const char *master_ip,
 	 local_filename);*/
 
 	/*update the first replica*/
-	int rs = ffs_sendfile(proto, c_get1stReplicaAddr(master_ip), server_port,
-			remote_filename, local_filename);
+	const char *_1stIp = c_get1stReplicaAddr(master_ip);
+
+#if ASYNC
+	pthread_t wthread;
+	ThreadArg ta(proto, _1stIp, server_port, remote_filename, local_filename);
+
+	pthread_create(&wthread, NULL, updateReplica, (void*) &ta);
+#else
+	int rs = ffs_sendfile(proto, _1stIp, server_port, remote_filename,
+			local_filename);
+#endif
 
 	/*update the second replica*/
-	rs = ffs_sendfile(proto, c_get2ndReplicaAddr(master_ip), server_port,
-			remote_filename, local_filename);
+	const char *_2ndIp = c_get2ndReplicaAddr(master_ip);
 
+#if ASYNC
+	ThreadArg ta(proto, _2ndIp, server_port, remote_filename, local_filename);
+
+	pthread_create(&wthread, NULL, updateReplica, (void*) &ta);
+#else
+	rs = ffs_sendfile(proto, _2ndIp, server_port, remote_filename,
+			local_filename);
+#endif
+
+#if ASYNC
+	return 0;
+#else
 	return rs;
+#endif
 }
 
 int FileWaiter::checkinFile(const char *proto, const char *master_ip,
@@ -112,22 +156,44 @@ int FileWaiter::checkinFile(const char *proto, const char *master_ip,
 	/*update the first replica*/
 	const char *_1stIp = c_get1stReplicaAddr(master_ip);
 
-	if (strcmp(_1stIp, current_ip)) { //not the current node, so update the replica on it
+	if (strcmp(_1stIp, current_ip)) { //current node is for replica, so update replica
 
+#if ASYNC
+		pthread_t wthread;
+		ThreadArg ta(proto, _1stIp, server_port, remote_filename, local_filename);
+
+		pthread_create(&wthread, NULL, updateReplica, (void*) &ta);
+#else
 		rs = ffs_sendfile(proto, _1stIp, server_port, remote_filename,
 				local_filename);
+#endif
 	}
 
 	/*update the second replica*/
 	const char *_2ndIp = c_get2ndReplicaAddr(master_ip);
 
-	if (strcmp(_2ndIp, current_ip)) { //not the current node, so update the replica on it
+	if (strcmp(_2ndIp, current_ip)) { //current node is for replica, so update replica
 
+#if ASYNC
+		pthread_t wthread;
+		ThreadArg ta(proto, _2ndIp, server_port, remote_filename, local_filename);
+
+		pthread_create(&wthread, NULL, updateReplica, (void*) &ta);
+#else
 		rs = ffs_sendfile(proto, _2ndIp, server_port, remote_filename,
 				local_filename);
+#endif
 	}
 
 	return rs;
+}
+
+void* FileWaiter::updateReplica(void* const arg) {
+
+	ThreadArg* pta = (ThreadArg*) arg;
+
+	int rs = ffs_sendfile(pta->proto, pta->replica_ip, pta->server_port,
+			pta->remote_filename, pta->local_filename);
 }
 
 int FileWaiter::rmFile(const char *proto, const char *master_ip,
